@@ -74,9 +74,22 @@ public class MonoTest {
             () -> log.info("Finished successfully"),
             Subscription::cancel
         );
+    }
+    
+    @Test
+    public void shouldTestDoOnMethod() {
+        String name = "Gabriel";
+        Mono<Object> mono = Mono
+            .just(name)
+            .log()
+            .map(String::toUpperCase)
+            .doOnSubscribe(subscription -> log.info("SUBSCRIBED!"))
+            .doOnRequest(l -> log.info("Request received, starting doing something..."))
+            .doOnNext(s -> log.info("Value is here. Executing doOnNext {}", s))
+            .flatMap(s -> Mono.empty())
+            .doOnNext(s -> log.info("Value is here. Executing doOnNext {}", s))
+            .doOnSuccess(s -> log.info("Completely successfully. Executing doOnSuccess {}", s));
         
-        StepVerifier.create(mono)
-                    .expectNext(name.toUpperCase())
-                    .verifyComplete();
+        mono.subscribe();
     }
 }
