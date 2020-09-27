@@ -150,6 +150,19 @@ public class FluxTest {
     }
     
     @Test
+    public void shouldTestFluxNumbersPrettyBackpressure() {
+        Flux<Integer> flux = Flux
+            .range(1, 5)
+            .log()
+            .limitRate(2);
+        
+        StepVerifier
+            .create(flux)
+            .expectNext(1, 2, 3, 4, 5)
+            .verifyComplete();
+    }
+    
+    @Test
     public void shouldTestFluxSubscriberIntervalOne() throws Exception {
         Flux<Long> flux = Flux
             .interval(Duration.ofMillis(100))
