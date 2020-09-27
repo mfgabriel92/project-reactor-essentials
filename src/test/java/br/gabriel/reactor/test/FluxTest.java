@@ -8,6 +8,7 @@ import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.List;
 
 @Slf4j
@@ -146,5 +147,34 @@ public class FluxTest {
             .create(flux)
             .expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
             .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestFluxSubscriberIntervalOne() throws Exception {
+        Flux<Long> flux = Flux
+            .interval(Duration.ofMillis(100))
+            .take(10)
+            .log();
+        
+        flux.subscribe(i -> log.info("{}", i));
+        
+        Thread.sleep(3000);
+    }
+    
+    @Test
+    public void shouldTestFluxSubscriberIntervalTwo() {
+        StepVerifier
+            .withVirtualTime(this::createInterval)
+            .expectSubscription()
+            .expectNoEvent(Duration.ofDays(1))
+            .thenAwait(Duration.ofDays(2))
+            .expectNext(0L)
+            .expectNext(1L)
+            .thenCancel()
+            .verify();
+    }
+    
+    private Flux<Long> createInterval() {
+        return Flux.interval(Duration.ofDays(1)).log();
     }
 }
