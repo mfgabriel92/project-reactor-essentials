@@ -28,4 +28,21 @@ public class ConnectableFluxTest {
             .expectComplete()
             .verify();
     }
+    
+    @Test
+    public void shouldTestAutoConnectableFlux() {
+        Flux<Integer> flux = Flux
+            .range(1, 5)
+            .log()
+            .delayElements(Duration.ofMillis(100))
+            .publish()
+            .autoConnect();
+        
+        StepVerifier
+            .create(flux)
+            .then(flux::subscribe)
+            .expectNext(1, 2, 3, 4, 5)
+            .expectComplete()
+            .verify();
+    }
 }
