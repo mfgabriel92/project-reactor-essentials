@@ -92,4 +92,52 @@ public class MonoTest {
         
         mono.subscribe();
     }
+    
+    @Test
+    public void shouldTestDoOnError() {
+        Mono<Object> mono = Mono.error(new IllegalArgumentException("Illegal argument exception"))
+            .doOnError(throwable -> log.info("Error: {}", throwable.getMessage()))
+            .log();
+        
+        StepVerifier.create(mono)
+                    .expectError(IllegalArgumentException.class)
+                    .verify();
+    }
+    
+    @Test
+    public void shouldTestDoOnErrorResume() {
+        String name = "Gabriel";
+        
+        Mono<Object> mono = Mono
+            .error(new IllegalArgumentException("Illegal argument exception"))
+            .onErrorResume(throwable -> {
+                log.info("Error: {}", throwable.getMessage());
+                return Mono.just(name);
+            })
+            .log();
+        
+        StepVerifier
+            .create(mono)
+            .expectNext(name)
+            .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestDoOnErrorReturn() {
+        String name = "Gabriel";
+        
+        Mono<Object> mono = Mono
+            .error(new IllegalArgumentException("Illegal argument exception"))
+            .onErrorReturn("EMPTY")
+            .onErrorResume(throwable -> {
+                log.info("Error: {}", throwable.getMessage());
+                return Mono.just(name);
+            })
+            .log();
+        
+        StepVerifier
+            .create(mono)
+            .expectNext("EMPTY")
+            .verifyComplete();
+    }
 }
