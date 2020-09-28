@@ -133,4 +133,18 @@ public class OperatorsTest {
         Flux<String> cd = Flux.just("c", "d");
         Flux.combineLatest(ab, cd, (s1, s2) -> s1.toUpperCase() + s2.toLowerCase()).log().subscribe();
     }
+    
+    @Test
+    public void shouldTestMerge() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        Flux.merge(ab, cd).subscribe(log::info);
+    }
+    
+    @Test
+    public void shouldTestMergeWith() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        ab.mergeWith(cd).log().subscribe();
+    }
 }
