@@ -1,10 +1,16 @@
 package br.gabriel.reactor.test;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 @Slf4j
 public class OperatorsTest {
@@ -47,6 +53,25 @@ public class OperatorsTest {
             .create(flux)
             .expectSubscription()
             .expectNext(1, 2, 3)
+            .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestSubscribeOnIO() throws Exception {
+        Mono<List<String>> file = Mono.fromCallable(() -> Files.readAllLines(Path.of("text-file")))
+            .log()
+            .subscribeOn(Schedulers.boundedElastic());
+        
+        Thread.sleep(2000);
+        
+        StepVerifier
+            .create(file)
+            .expectSubscription()
+            .thenConsumeWhile(i -> {
+                Assertions.assertFalse(i.isEmpty());
+                log.info("{}", i.size());
+                return true;
+            })
             .verifyComplete();
     }
 }
