@@ -74,4 +74,30 @@ public class OperatorsTest {
             })
             .verifyComplete();
     }
+    
+    @Test
+    public void shouldTestSwitchIfEmpty() {
+        Flux<Object> flux = Flux.empty()
+            .switchIfEmpty(Flux.just("Not empty anymore"))
+            .log();
+        
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .expectNext("Not empty anymore")
+            .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestDefer() throws Exception {
+        Mono<Long> defer = Mono.defer(() -> Mono.just(System.currentTimeMillis()));
+        
+        defer.subscribe(t -> log.info("{}", t));
+        Thread.sleep(50);
+        defer.subscribe(t -> log.info("{}", t));
+        Thread.sleep(50);
+        defer.subscribe(t -> log.info("{}", t));
+        Thread.sleep(50);
+        defer.subscribe(t -> log.info("{}", t));
+    }
 }
