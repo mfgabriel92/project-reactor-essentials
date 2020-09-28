@@ -100,4 +100,37 @@ public class OperatorsTest {
         Thread.sleep(50);
         defer.subscribe(t -> log.info("{}", t));
     }
+    
+    @Test
+    public void shouldTestConcat() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        Flux<String> abcd = Flux.concat(ab, cd).log();
+        
+        StepVerifier
+            .create(abcd)
+            .expectSubscription()
+            .expectNext("a", "b", "c", "d")
+            .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestConcatWith() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        Flux<String> flux = ab.concatWith(cd);
+    
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .expectNext("a", "b", "c", "d")
+            .verifyComplete();
+    }
+    
+    @Test
+    public void shouldTestCombineLast() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        Flux.combineLatest(ab, cd, (s1, s2) -> s1.toUpperCase() + s2.toLowerCase()).log().subscribe();
+    }
 }
