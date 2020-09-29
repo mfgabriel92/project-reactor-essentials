@@ -128,6 +128,25 @@ public class OperatorsTest {
     }
     
     @Test
+    public void shouldTestConcatDelayError() {
+        Flux<String> ab = Flux.just("a", "b").map(s -> {
+            if (s.equals("b")) {
+                throw new IllegalArgumentException("Error!");
+            }
+            
+            return s;
+        });
+        Flux<String> cd = Flux.just("c", "d");
+        Flux<String> flux = Flux.concatDelayError(ab, cd).log();
+    
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .expectNext("a", "c", "d")
+            .verifyError();
+    }
+    
+    @Test
     public void shouldTestCombineLast() {
         Flux<String> ab = Flux.just("a", "b");
         Flux<String> cd = Flux.just("c", "d");
@@ -146,5 +165,25 @@ public class OperatorsTest {
         Flux<String> ab = Flux.just("a", "b");
         Flux<String> cd = Flux.just("c", "d");
         ab.mergeWith(cd).log().subscribe();
+    }
+    
+    @Test
+    public void shouldTestMergeSequential() {
+        Flux<String> ab = Flux.just("a", "b");
+        Flux<String> cd = Flux.just("c", "d");
+        Flux.mergeSequential(ab, cd).log().subscribe();
+    }
+    
+    @Test
+    public void shouldTestMergeDelayError() {
+        Flux<String> ab = Flux.just("a", "b").map(s -> {
+            if (s.equals("b")) {
+                throw new IllegalArgumentException("Error!");
+            }
+    
+            return s;
+        });
+        Flux<String> cd = Flux.just("c", "d");
+        Flux.mergeDelayError(1, ab, cd).log().subscribe();
     }
 }
